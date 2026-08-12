@@ -1072,7 +1072,10 @@
             const staffName = sessionStorage.getItem(SESSION_KEY_STAFF) || "System";
 
             try {
-                const snap = await getDocs(collection(db, "schedules"));
+                // Routines live in `tasks` with status "schedule" (same permissions as existing tasks)
+                const snap = await getDocs(
+                    query(collection(db, "tasks"), where("status", "==", "schedule"))
+                );
                 const schedules = [];
                 snap.forEach((d) => {
                     schedules.push({ id: d.id, ...d.data() });
@@ -1093,7 +1096,7 @@
                     });
 
                     try {
-                        await updateDoc(doc(db, "schedules", schedule.id), {
+                        await updateDoc(doc(db, "tasks", schedule.id), {
                             lastSpawnedFor: todayKey
                         });
                     } catch (e) {
@@ -1137,8 +1140,9 @@
                     const days =
                         scheduleType === "daily" ? [0, 1, 2, 3, 4, 5, 6] : weekdays;
 
-                    const scheduleRef = await addDoc(collection(db, "schedules"), {
+                    const scheduleRef = await addDoc(collection(db, "tasks"), {
                         taskText: text,
+                        status: "schedule",
                         outletId: outlet.id,
                         outletName: outlet.name,
                         scheduleType,
@@ -1146,7 +1150,12 @@
                         active: true,
                         createdBy: staffName,
                         createdAt: serverTimestamp(),
-                        lastSpawnedFor: null
+                        lastSpawnedFor: null,
+                        completedBy: null,
+                        completedAt: null,
+                        scheduleId: null,
+                        scheduledFor: null,
+                        isRecurringInstance: false
                     });
 
                     // If today matches, create today's To Do immediately
@@ -1189,7 +1198,12 @@
             const outlet = getCurrentOutlet();
             if (!outlet) return;
 
-            unsubscribeSchedules = onSnapshot(collection(db, "schedules"), (snapshot) => {
+            const q = query(
+                collection(db, "tasks"),
+                where("status", "==", "schedule")
+            );
+
+            unsubscribeSchedules = onSnapshot(q, (snapshot) => {
                 const schedules = [];
                 snapshot.forEach((d) => {
                     schedules.push({ id: d.id, ...d.data() });
@@ -1246,8 +1260,9 @@
             btn.disabled = true;
             btn.textContent = "Stopping…";
             try {
-                await updateDoc(doc(db, "schedules", scheduleId), {
+                await updateDoc(doc(db, "tasks", scheduleId), {
                     active: false,
+                    status: "schedule_stopped",
                     stoppedAt: serverTimestamp(),
                     stoppedBy: sessionStorage.getItem(SESSION_KEY_STAFF) || null
                 });
