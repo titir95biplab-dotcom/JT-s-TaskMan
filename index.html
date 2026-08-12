@@ -590,6 +590,67 @@
             font-size: 0.95rem;
         }
 
+        /* --- Big remaining-work hero --- */
+        .todo-hero {
+            background: linear-gradient(145deg, #FFF7EE 0%, #FFE8D1 45%, #FFD9B0 100%);
+            border: 1.5px solid #F0C89A;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 18px 20px 16px;
+            margin-bottom: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.2s;
+        }
+
+        .todo-hero:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .todo-hero-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--secondary-dark);
+            letter-spacing: 0.02em;
+            margin-bottom: 2px;
+        }
+
+        .todo-hero-label-bn {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #9A4E0E;
+            margin-bottom: 4px;
+        }
+
+        .todo-hero-number {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: clamp(3.8rem, 16vw, 5.5rem);
+            font-weight: 700;
+            line-height: 0.95;
+            color: var(--secondary-dark);
+            letter-spacing: -0.04em;
+        }
+
+        .todo-hero-sub {
+            margin-top: 6px;
+            font-size: 0.85rem;
+            color: #A05A1A;
+            font-weight: 600;
+        }
+
+        .todo-hero.is-clear {
+            background: linear-gradient(145deg, #EAF7EE 0%, #D8F0DC 100%);
+            border-color: #A8D4B2;
+        }
+
+        .todo-hero.is-clear .todo-hero-label-bn,
+        .todo-hero.is-clear .todo-hero-label,
+        .todo-hero.is-clear .todo-hero-number,
+        .todo-hero.is-clear .todo-hero-sub {
+            color: var(--primary-dark);
+        }
+
         /* --- Dashboard nav cards --- */
         .dash-nav {
             display: grid;
@@ -790,6 +851,12 @@
             <button id="btn-logout" class="btn-logout">Logout</button>
         </header>
 
+        <button type="button" class="todo-hero" id="todo-hero" aria-label="বাকি কাজ দেখুন">
+            <div class="todo-hero-label-bn">কাজ কতগুলো বাকি</div>
+            <div class="todo-hero-number" id="hero-todo-count">0</div>
+            <div class="todo-hero-sub" id="hero-todo-sub">pending tasks</div>
+        </button>
+
         <nav class="dash-nav" aria-label="Dashboard sections">
             <button type="button" class="dash-nav-btn active" data-panel="todo" id="nav-todo">
                 <span class="dash-nav-top">
@@ -965,8 +1032,27 @@
         const statTodo = document.getElementById("stat-todo");
         const statDone = document.getElementById("stat-done");
         const statRoutines = document.getElementById("stat-routines");
+        const heroTodoCount = document.getElementById("hero-todo-count");
+        const heroTodoSub = document.getElementById("hero-todo-sub");
+        const todoHero = document.getElementById("todo-hero");
         const weekdayRow = document.getElementById("weekday-row");
         const scheduleHint = document.getElementById("schedule-hint");
+
+        function setTodoCount(count) {
+            const n = Number(count) || 0;
+            if (statTodo) statTodo.textContent = String(n);
+            if (heroTodoCount) heroTodoCount.textContent = String(n);
+            if (todoHero) todoHero.classList.toggle("is-clear", n === 0);
+            if (heroTodoSub) {
+                if (n === 0) {
+                    heroTodoSub.textContent = "সব কাজ শেষ · all clear";
+                } else if (n === 1) {
+                    heroTodoSub.textContent = "1 টা কাজ বাকি · 1 pending";
+                } else {
+                    heroTodoSub.textContent = `${n} টা কাজ বাকি · ${n} pending`;
+                }
+            }
+        }
 
         function showDashPanel(panelName) {
             document.querySelectorAll(".dash-nav-btn").forEach((btn) => {
@@ -984,6 +1070,10 @@
         document.querySelectorAll(".dash-nav-btn").forEach((btn) => {
             btn.addEventListener("click", () => showDashPanel(btn.dataset.panel));
         });
+
+        if (todoHero) {
+            todoHero.addEventListener("click", () => showDashPanel("todo"));
+        }
 
         function getSelectedScheduleType() {
             const checked = document.querySelector('input[name="schedule-type"]:checked');
@@ -1466,7 +1556,7 @@
                 });
 
                 renderTodoList(outletTasks);
-                statTodo.textContent = String(outletTasks.length);
+                setTodoCount(outletTasks.length);
             }, (error) => {
                 console.error("Error listening to todos:", error);
                 todoList.innerHTML = `<li class="empty-state" style="color:var(--danger);">Error: ${escapeHtml(error.message)}</li>`;
