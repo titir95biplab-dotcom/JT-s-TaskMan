@@ -377,6 +377,140 @@
             margin-bottom: 12px;
         }
 
+        .schedule-box {
+            margin: 4px 0 14px;
+            padding: 12px;
+            background: #F7FAF8;
+            border: 1px solid #DCE5DF;
+            border-radius: var(--radius-sm);
+        }
+
+        .schedule-box > .field-label {
+            margin-bottom: 10px;
+        }
+
+        .schedule-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .schedule-option {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .schedule-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            margin: 0;
+        }
+
+        .schedule-pill {
+            display: block;
+            text-align: center;
+            padding: 10px 6px;
+            border: 1.5px solid #D5DED8;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--muted);
+            background: #fff;
+            transition: border-color 0.2s, background 0.2s, color 0.2s;
+        }
+
+        .schedule-option input:checked + .schedule-pill {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+            color: var(--primary-dark);
+        }
+
+        .weekday-row {
+            display: none;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .weekday-row.visible { display: grid; }
+
+        .weekday-option {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .weekday-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            margin: 0;
+        }
+
+        .weekday-chip {
+            display: grid;
+            place-items: center;
+            height: 36px;
+            border-radius: 8px;
+            border: 1.5px solid #D5DED8;
+            background: #fff;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--muted);
+        }
+
+        .weekday-option input:checked + .weekday-chip {
+            border-color: var(--secondary);
+            background: #FFF0E4;
+            color: var(--secondary-dark);
+        }
+
+        .schedule-hint {
+            margin-top: 10px;
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.35;
+        }
+
+        .schedule-card {
+            background: var(--white);
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border-radius: var(--radius-sm);
+            border-left: 5px solid #5C9EAD;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .schedule-card .task-text { margin-bottom: 4px; }
+
+        .btn-stop {
+            background: #F3E9E9;
+            color: #8B3A3A;
+            padding: 8px 12px;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+        .btn-stop:hover { background: #ECDADA; }
+
+        .recur-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            background: #E7F3F6;
+            color: #2F6B78;
+            vertical-align: middle;
+        }
+
         /* --- Lists --- */
         .section-title {
             margin: 8px 0 12px;
@@ -460,9 +594,10 @@
             .auth-card { padding: 26px 18px; }
             .outlet-grid { gap: 8px; }
             .outlet-label { font-size: 0.82rem; }
-            .task-card { flex-direction: column; }
-            .btn-complete { width: 100%; }
+            .task-card, .schedule-card { flex-direction: column; }
+            .btn-complete, .btn-stop { width: 100%; }
             header { align-items: flex-start; }
+            .schedule-options { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -551,11 +686,43 @@
         <div class="create-task-box">
             <label for="new-task-text">New task for this outlet</label>
             <textarea id="new-task-text" placeholder="Write a new instruction or task…"></textarea>
+
+            <div class="schedule-box">
+                <span class="field-label">When should this task appear?</span>
+                <div class="schedule-options" role="radiogroup" aria-label="Task schedule">
+                    <label class="schedule-option">
+                        <input type="radio" name="schedule-type" value="once" checked>
+                        <span class="schedule-pill">Once</span>
+                    </label>
+                    <label class="schedule-option">
+                        <input type="radio" name="schedule-type" value="daily">
+                        <span class="schedule-pill">Everyday</span>
+                    </label>
+                    <label class="schedule-option">
+                        <input type="radio" name="schedule-type" value="weekly">
+                        <span class="schedule-pill">Specific days</span>
+                    </label>
+                </div>
+                <div id="weekday-row" class="weekday-row" aria-label="Weekdays">
+                    <label class="weekday-option"><input type="checkbox" value="1"><span class="weekday-chip">Mon</span></label>
+                    <label class="weekday-option"><input type="checkbox" value="2"><span class="weekday-chip">Tue</span></label>
+                    <label class="weekday-option"><input type="checkbox" value="3"><span class="weekday-chip">Wed</span></label>
+                    <label class="weekday-option"><input type="checkbox" value="4"><span class="weekday-chip">Thu</span></label>
+                    <label class="weekday-option"><input type="checkbox" value="5"><span class="weekday-chip">Fri</span></label>
+                    <label class="weekday-option"><input type="checkbox" value="6"><span class="weekday-chip">Sat</span></label>
+                    <label class="weekday-option"><input type="checkbox" value="0"><span class="weekday-chip">Sun</span></label>
+                </div>
+                <p id="schedule-hint" class="schedule-hint">Appears one time in To Do after you create it.</p>
+            </div>
+
             <button id="btn-create-task" class="btn-block btn-primary">Create Task</button>
         </div>
 
         <h3 class="section-title">To Do</h3>
         <ul id="todo-list" class="task-list"></ul>
+
+        <h3 class="section-title">Daily / Weekly Routines</h3>
+        <ul id="schedule-list" class="task-list"></ul>
 
         <h3 class="section-title">Completed History</h3>
         <ul id="completed-list" class="task-list"></ul>
@@ -568,6 +735,8 @@
             getFirestore,
             collection,
             addDoc,
+            setDoc,
+            getDoc,
             query,
             where,
             onSnapshot,
@@ -608,9 +777,21 @@
         const SESSION_KEY_OUTLET = "jt_outlet_id";
 
         let unsubscribeTodo = null;
+        let unsubscribeSchedules = null;
         let allCompletedTasks = [];
         let completedPageSize = 10;
         let completedShownCount = 0;
+        let spawnInFlight = false;
+
+        const DAY_LABELS = {
+            0: "Sun",
+            1: "Mon",
+            2: "Tue",
+            3: "Wed",
+            4: "Thu",
+            5: "Fri",
+            6: "Sat"
+        };
 
         const sections = {
             login: document.getElementById("login-section"),
@@ -631,10 +812,80 @@
         const inputTaskText = document.getElementById("new-task-text");
         const btnCreateTask = document.getElementById("btn-create-task");
         const todoList = document.getElementById("todo-list");
+        const scheduleList = document.getElementById("schedule-list");
         const completedList = document.getElementById("completed-list");
         const btnLoadMore = document.getElementById("btn-load-more");
         const statTodo = document.getElementById("stat-todo");
         const statDone = document.getElementById("stat-done");
+        const weekdayRow = document.getElementById("weekday-row");
+        const scheduleHint = document.getElementById("schedule-hint");
+
+        function getSelectedScheduleType() {
+            const checked = document.querySelector('input[name="schedule-type"]:checked');
+            return checked ? checked.value : "once";
+        }
+
+        function getSelectedWeekdays() {
+            return Array.from(document.querySelectorAll("#weekday-row input:checked"))
+                .map((el) => Number(el.value))
+                .sort((a, b) => a - b);
+        }
+
+        function updateScheduleUI() {
+            const type = getSelectedScheduleType();
+            weekdayRow.classList.toggle("visible", type === "weekly");
+            if (type === "once") {
+                scheduleHint.textContent = "Appears one time in To Do after you create it.";
+            } else if (type === "daily") {
+                scheduleHint.textContent = "Saved as a daily routine. It will appear automatically every day (India time).";
+            } else {
+                scheduleHint.textContent = "Pick one or more days. It will appear automatically on those days.";
+            }
+        }
+
+        document.querySelectorAll('input[name="schedule-type"]').forEach((el) => {
+            el.addEventListener("change", updateScheduleUI);
+        });
+        updateScheduleUI();
+
+        /** Local calendar helpers in Asia/Kolkata (outlet timezone). */
+        function getIndiaNow() {
+            return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+        }
+
+        function getTodayKey() {
+            const d = getIndiaNow();
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${day}`;
+        }
+
+        function getTodayWeekday() {
+            return getIndiaNow().getDay(); // 0=Sun … 6=Sat
+        }
+
+        function scheduleMatchesToday(schedule) {
+            if (!schedule || schedule.active === false) return false;
+            const today = getTodayWeekday();
+            if (schedule.scheduleType === "daily") return true;
+            if (schedule.scheduleType === "weekly") {
+                return Array.isArray(schedule.days) && schedule.days.map(Number).includes(today);
+            }
+            return false;
+        }
+
+        function formatScheduleLabel(schedule) {
+            if (schedule.scheduleType === "daily") return "Everyday";
+            if (schedule.scheduleType === "weekly") {
+                const days = (schedule.days || []).map(Number).sort((a, b) => {
+                    const order = [1, 2, 3, 4, 5, 6, 0];
+                    return order.indexOf(a) - order.indexOf(b);
+                });
+                return days.map((d) => DAY_LABELS[d] || d).join(", ") || "No days";
+            }
+            return "Once";
+        }
 
         function getSelectedOutletId() {
             const checked = document.querySelector('input[name="outlet"]:checked');
@@ -740,13 +991,17 @@
                 unsubscribeTodo();
                 unsubscribeTodo = null;
             }
+            if (unsubscribeSchedules) {
+                unsubscribeSchedules();
+                unsubscribeSchedules = null;
+            }
             sessionStorage.clear();
             window.location.reload();
         }
 
         btnLogout.addEventListener("click", logout);
 
-        function showDashboard(staffName) {
+        async function showDashboard(staffName) {
             const outlet = getCurrentOutlet();
             if (!outlet) {
                 logout();
@@ -762,8 +1017,94 @@
                 unsubscribeTodo();
                 unsubscribeTodo = null;
             }
+            if (unsubscribeSchedules) {
+                unsubscribeSchedules();
+                unsubscribeSchedules = null;
+            }
+
+            await spawnScheduledTasksForToday();
             subscribeToTodos();
+            subscribeToSchedules();
             fetchAndRenderCompletedTasks();
+        }
+
+        async function createTaskInstance({
+            text,
+            outlet,
+            staffName,
+            scheduleId = null,
+            scheduledFor = null,
+            createdByLabel = null
+        }) {
+            const payload = {
+                taskText: text,
+                status: "todo",
+                outletId: outlet.id,
+                outletName: outlet.name,
+                createdBy: createdByLabel || staffName,
+                createdAt: serverTimestamp(),
+                completedBy: null,
+                completedAt: null,
+                scheduleId: scheduleId,
+                scheduledFor: scheduledFor,
+                isRecurringInstance: Boolean(scheduleId)
+            };
+
+            if (scheduleId && scheduledFor) {
+                const instanceId = `${scheduleId}_${scheduledFor}`;
+                const taskRef = doc(db, "tasks", instanceId);
+                const existing = await getDoc(taskRef);
+                if (existing.exists()) return false;
+                await setDoc(taskRef, payload);
+                return true;
+            }
+
+            await addDoc(collection(db, "tasks"), payload);
+            return true;
+        }
+
+        async function spawnScheduledTasksForToday() {
+            const outlet = getCurrentOutlet();
+            if (!outlet || spawnInFlight) return;
+            spawnInFlight = true;
+
+            const todayKey = getTodayKey();
+            const staffName = sessionStorage.getItem(SESSION_KEY_STAFF) || "System";
+
+            try {
+                const snap = await getDocs(collection(db, "schedules"));
+                const schedules = [];
+                snap.forEach((d) => {
+                    schedules.push({ id: d.id, ...d.data() });
+                });
+
+                const due = schedules.filter(
+                    (s) => belongsToOutlet(s, outlet.id) && scheduleMatchesToday(s)
+                );
+
+                for (const schedule of due) {
+                    await createTaskInstance({
+                        text: schedule.taskText,
+                        outlet,
+                        staffName,
+                        scheduleId: schedule.id,
+                        scheduledFor: todayKey,
+                        createdByLabel: `Auto · ${schedule.createdBy || "Routine"}`
+                    });
+
+                    try {
+                        await updateDoc(doc(db, "schedules", schedule.id), {
+                            lastSpawnedFor: todayKey
+                        });
+                    } catch (e) {
+                        console.warn("Could not update lastSpawnedFor", e);
+                    }
+                }
+            } catch (e) {
+                console.error("Error spawning scheduled tasks:", e);
+            } finally {
+                spawnInFlight = false;
+            }
         }
 
         btnCreateTask.addEventListener("click", async () => {
@@ -778,27 +1119,143 @@
                 return;
             }
 
+            const scheduleType = getSelectedScheduleType();
+            const weekdays = getSelectedWeekdays();
+
+            if (scheduleType === "weekly" && weekdays.length === 0) {
+                alert("Please select at least one day for this routine.");
+                return;
+            }
+
             btnCreateTask.disabled = true;
             btnCreateTask.textContent = "Saving…";
 
             try {
-                await addDoc(collection(db, "tasks"), {
-                    taskText: text,
-                    status: "todo",
-                    outletId: outlet.id,
-                    outletName: outlet.name,
-                    createdBy: staffName,
-                    createdAt: serverTimestamp(),
-                    completedBy: null,
-                    completedAt: null
-                });
+                if (scheduleType === "once") {
+                    await createTaskInstance({ text, outlet, staffName });
+                } else {
+                    const days =
+                        scheduleType === "daily" ? [0, 1, 2, 3, 4, 5, 6] : weekdays;
+
+                    const scheduleRef = await addDoc(collection(db, "schedules"), {
+                        taskText: text,
+                        outletId: outlet.id,
+                        outletName: outlet.name,
+                        scheduleType,
+                        days,
+                        active: true,
+                        createdBy: staffName,
+                        createdAt: serverTimestamp(),
+                        lastSpawnedFor: null
+                    });
+
+                    // If today matches, create today's To Do immediately
+                    const tempSchedule = {
+                        id: scheduleRef.id,
+                        scheduleType,
+                        days,
+                        active: true
+                    };
+                    if (scheduleMatchesToday(tempSchedule)) {
+                        const todayKey = getTodayKey();
+                        await createTaskInstance({
+                            text,
+                            outlet,
+                            staffName,
+                            scheduleId: scheduleRef.id,
+                            scheduledFor: todayKey,
+                            createdByLabel: `Auto · ${staffName}`
+                        });
+                        await updateDoc(scheduleRef, { lastSpawnedFor: todayKey });
+                    }
+                }
+
                 inputTaskText.value = "";
+                document.querySelector('input[name="schedule-type"][value="once"]').checked = true;
+                document.querySelectorAll("#weekday-row input").forEach((el) => {
+                    el.checked = false;
+                });
+                updateScheduleUI();
             } catch (e) {
                 console.error("Error adding task: ", e);
                 alert("Failed to create task. Check network.");
             } finally {
                 btnCreateTask.disabled = false;
                 btnCreateTask.textContent = "Create Task";
+            }
+        });
+
+        function subscribeToSchedules() {
+            const outlet = getCurrentOutlet();
+            if (!outlet) return;
+
+            unsubscribeSchedules = onSnapshot(collection(db, "schedules"), (snapshot) => {
+                const schedules = [];
+                snapshot.forEach((d) => {
+                    schedules.push({ id: d.id, ...d.data() });
+                });
+
+                const active = filterByOutlet(schedules, outlet.id)
+                    .filter((s) => s.active !== false)
+                    .sort((a, b) => {
+                        const timeA = a.createdAt ? a.createdAt.toMillis() : 0;
+                        const timeB = b.createdAt ? b.createdAt.toMillis() : 0;
+                        return timeB - timeA;
+                    });
+
+                renderScheduleList(active);
+            }, (error) => {
+                console.error("Error listening to schedules:", error);
+                scheduleList.innerHTML = `<li class="empty-state" style="color:var(--danger);">Error: ${escapeHtml(error.message)}</li>`;
+            });
+        }
+
+        function renderScheduleList(schedules) {
+            scheduleList.innerHTML = "";
+            if (schedules.length === 0) {
+                scheduleList.innerHTML = '<li class="empty-state">No daily/weekly routines yet. Create one with Everyday or Specific days.</li>';
+                return;
+            }
+
+            schedules.forEach((schedule) => {
+                const li = document.createElement("li");
+                li.className = "schedule-card";
+                const dueToday = scheduleMatchesToday(schedule);
+                li.innerHTML = `
+                    <div class="task-content">
+                        <div class="task-text">${escapeHtml(schedule.taskText)}</div>
+                        <div class="task-meta">
+                            ${escapeHtml(formatScheduleLabel(schedule))}
+                            ${dueToday ? " · Due today" : ""}
+                            · Set by <strong>${escapeHtml(schedule.createdBy || "—")}</strong>
+                        </div>
+                    </div>
+                    <button class="btn-stop" type="button" data-stop-schedule="${schedule.id}">Stop</button>
+                `;
+                scheduleList.appendChild(li);
+            });
+        }
+
+        scheduleList.addEventListener("click", async (e) => {
+            const btn = e.target.closest("[data-stop-schedule]");
+            if (!btn) return;
+            const scheduleId = btn.getAttribute("data-stop-schedule");
+            if (!scheduleId) return;
+            if (!confirm("Stop this routine? It will no longer appear automatically.")) return;
+
+            btn.disabled = true;
+            btn.textContent = "Stopping…";
+            try {
+                await updateDoc(doc(db, "schedules", scheduleId), {
+                    active: false,
+                    stoppedAt: serverTimestamp(),
+                    stoppedBy: sessionStorage.getItem(SESSION_KEY_STAFF) || null
+                });
+            } catch (err) {
+                console.error("Error stopping schedule:", err);
+                alert("Failed to stop routine.");
+                btn.disabled = false;
+                btn.textContent = "Stop";
             }
         });
 
@@ -952,13 +1409,17 @@
             const li = document.createElement("li");
             li.className = `task-card status-${task.status}`;
 
+            const recurBadge = task.isRecurringInstance || task.scheduleId
+                ? '<span class="recur-badge">Routine</span>'
+                : "";
+
             const timeStr = isCompleted
                 ? `Completed by <strong>${escapeHtml(task.completedBy || "—")}</strong> · ${formatTime(task.completedAt)}`
                 : `Created by <strong>${escapeHtml(task.createdBy || "—")}</strong> · ${formatTime(task.createdAt)}`;
 
             let html = `
                 <div class="task-content">
-                    <div class="task-text">${escapeHtml(task.taskText)}</div>
+                    <div class="task-text">${escapeHtml(task.taskText)}${recurBadge}</div>
                     <div class="task-meta">${timeStr}</div>
                 </div>
             `;
