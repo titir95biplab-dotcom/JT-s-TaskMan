@@ -3,165 +3,466 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juice Therapy – Birati | Task Manager</title>
+    <title>Juice Therapy | Multi-Outlet Task Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4CAF50; /* Fresh Green */
-            --primary-dark: #388E3C;
-            --secondary: #FF9800; /* Juice Orange */
-            --bg: #f4f7f6;
-            --text: #333;
+            --primary: #2F8F46;
+            --primary-dark: #1F6B32;
+            --primary-soft: #E8F5E9;
+            --secondary: #E67E22;
+            --secondary-dark: #C86812;
+            --bg: #F3F7F4;
+            --bg-accent: #E4EFE6;
+            --text: #1F2A24;
+            --muted: #6B7A70;
             --white: #ffffff;
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
-            --radius: 8px;
+            --danger: #C62828;
+            --shadow: 0 8px 24px rgba(31, 42, 36, 0.08);
+            --shadow-sm: 0 2px 8px rgba(31, 42, 36, 0.06);
+            --radius: 14px;
+            --radius-sm: 10px;
+            --ring: 0 0 0 3px rgba(47, 143, 70, 0.22);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        
-        body { background-color: var(--bg); color: var(--text); padding-bottom: 50px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* --- Layout & Containers --- */
+        body {
+            font-family: 'DM Sans', system-ui, sans-serif;
+            background:
+                radial-gradient(ellipse 80% 50% at 10% -10%, #D8F0DC 0%, transparent 55%),
+                radial-gradient(ellipse 60% 40% at 100% 0%, #FFE8D1 0%, transparent 50%),
+                var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 48px;
+        }
+
         .container {
-            max-width: 800px;
+            max-width: 820px;
             margin: 0 auto;
             padding: 20px;
         }
 
         .section {
-            display: none; /* Hidden by default */
-            animation: fadeIn 0.3s ease-in-out;
+            display: none;
+            animation: fadeIn 0.35s ease;
         }
 
         .active-section { display: block; }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- Login & Staff Cards --- */
+        @keyframes pulseSoft {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        /* --- Auth --- */
+        .auth-wrap {
+            min-height: calc(100vh - 40px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 0;
+        }
+
         .auth-card {
             background: var(--white);
-            max-width: 400px;
-            margin: 100px auto;
-            padding: 30px;
-            border-radius: var(--radius);
+            width: 100%;
+            max-width: 440px;
+            padding: 32px 28px;
+            border-radius: 20px;
             box-shadow: var(--shadow);
+            border: 1px solid rgba(47, 143, 70, 0.08);
+        }
+
+        .brand-mark {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 22px;
             text-align: center;
         }
 
-        .auth-card h2 { margin-bottom: 20px; color: var(--primary); }
-        .logo-text { font-size: 1.5rem; font-weight: bold; color: var(--secondary); margin-bottom: 5px; display: block;}
+        .brand-name {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--secondary);
+            letter-spacing: -0.02em;
+        }
 
-        input {
+        .brand-sub {
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .auth-card h2 {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 1.35rem;
+            margin-bottom: 6px;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .auth-hint {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 22px;
+        }
+
+        .outlet-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .outlet-option {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .outlet-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .outlet-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 16px 10px;
+            border: 2px solid #E2E8E4;
+            border-radius: var(--radius-sm);
+            background: #FAFCFA;
+            transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+            min-height: 96px;
+            justify-content: center;
+        }
+
+        .outlet-option:hover .outlet-tile {
+            border-color: #B7D4BE;
+            transform: translateY(-1px);
+        }
+
+        .outlet-option input:checked + .outlet-tile {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+            box-shadow: var(--ring);
+        }
+
+        .outlet-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 1rem;
+            font-weight: 700;
+            color: white;
+            background: var(--primary);
+        }
+
+        .outlet-option[data-outlet="nimta"] .outlet-icon {
+            background: var(--secondary);
+        }
+
+        .outlet-label {
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .outlet-code {
+            font-size: 0.72rem;
+            color: var(--muted);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        label.field-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        input, textarea, select {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            border: 1.5px solid #D5DED8;
+            border-radius: var(--radius-sm);
             font-size: 16px;
+            font-family: inherit;
+            background: #fff;
+            color: var(--text);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: var(--ring);
         }
 
         button {
             cursor: pointer;
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
             font-weight: 600;
-            transition: background 0.2s;
+            font-family: inherit;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
         }
 
-        .btn-block { width: 100%; padding: 12px; }
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: var(--primary-dark); }
-        
-        .error-msg { color: #d32f2f; margin-bottom: 10px; font-size: 0.9rem; min-height: 20px; }
+        button:active { transform: scale(0.98); }
+
+        .btn-block { width: 100%; padding: 13px; }
+        .btn-primary {
+            background: linear-gradient(180deg, #3AA354 0%, var(--primary) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(47, 143, 70, 0.28);
+        }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-primary:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-msg {
+            color: var(--danger);
+            margin-bottom: 12px;
+            font-size: 0.88rem;
+            min-height: 20px;
+            text-align: center;
+        }
 
         /* --- Dashboard Header --- */
         header {
             background: var(--white);
-            padding: 15px 20px;
+            padding: 16px 18px;
             border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-sm);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
+            gap: 12px;
+            border: 1px solid rgba(47, 143, 70, 0.06);
         }
-        
-        .user-info { font-size: 0.9rem; color: #666; }
+
+        .header-left { min-width: 0; }
+
+        .header-brand {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--secondary);
+            line-height: 1.2;
+        }
+
+        .user-info {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 4px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 10px;
+        }
+
         .user-info strong { color: var(--primary); }
-        .btn-logout { background: #e0e0e0; color: #333; padding: 5px 10px; font-size: 0.85rem; }
+
+        .outlet-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            background: var(--primary-soft);
+            color: var(--primary-dark);
+        }
+
+        .outlet-badge.nimta {
+            background: #FFF0E4;
+            color: var(--secondary-dark);
+        }
+
+        .btn-logout {
+            background: #EEF2EF;
+            color: var(--text);
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .btn-logout:hover { background: #E0E6E2; }
+
+        /* --- Stats strip --- */
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .stat-chip {
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(47, 143, 70, 0.06);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .stat-value {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-top: 2px;
+        }
+
+        .stat-chip.todo .stat-value { color: var(--secondary); }
+        .stat-chip.done .stat-value { color: var(--primary); }
 
         /* --- Task Creation --- */
         .create-task-box {
             background: var(--white);
-            padding: 20px;
+            padding: 18px;
             border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 22px;
+            border: 1px solid rgba(47, 143, 70, 0.06);
         }
-        
+
+        .create-task-box label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
         textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
             resize: vertical;
-            min-height: 80px;
-            font-family: inherit;
-            margin-bottom: 10px;
+            min-height: 88px;
+            margin-bottom: 12px;
         }
 
         /* --- Lists --- */
-        h3 { margin: 20px 0 10px; color: #444; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        .section-title {
+            margin: 8px 0 12px;
+            color: var(--text);
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #DCE5DF;
+        }
 
         .task-list { list-style: none; }
 
         .task-card {
             background: var(--white);
-            padding: 15px;
+            padding: 14px 16px;
             margin-bottom: 10px;
-            border-radius: var(--radius);
+            border-radius: var(--radius-sm);
             border-left: 5px solid #ddd;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: var(--shadow-sm);
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            gap: 10px;
+            gap: 12px;
+            animation: fadeIn 0.25s ease;
         }
 
         .task-card.status-todo { border-left-color: var(--secondary); }
-        .task-card.status-completed { border-left-color: var(--primary); opacity: 0.8; }
+        .task-card.status-completed { border-left-color: var(--primary); opacity: 0.88; }
 
-        .task-content { flex: 1; }
-        .task-text { font-size: 1.1rem; margin-bottom: 5px; line-height: 1.4; word-break: break-word; }
-        .task-meta { font-size: 0.8rem; color: #888; }
-        
-        .btn-complete {
-            background-color: var(--secondary);
-            color: white;
-            padding: 8px 12px;
-            font-size: 0.9rem;
-            white-space: nowrap;
+        .task-content { flex: 1; min-width: 0; }
+        .task-text {
+            font-size: 1.02rem;
+            margin-bottom: 6px;
+            line-height: 1.45;
+            word-break: break-word;
+            font-weight: 500;
         }
-        .btn-complete:hover { background-color: #e68900; }
-        
+        .task-meta { font-size: 0.78rem; color: var(--muted); }
+        .task-meta strong { color: var(--text); font-weight: 600; }
+
+        .btn-complete {
+            background: linear-gradient(180deg, #F0A04A 0%, var(--secondary) 100%);
+            color: white;
+            padding: 9px 14px;
+            font-size: 0.88rem;
+            white-space: nowrap;
+            box-shadow: 0 3px 10px rgba(230, 126, 34, 0.25);
+        }
+        .btn-complete:hover { background: var(--secondary-dark); }
+
         .btn-load-more {
             display: block;
             width: 100%;
-            padding: 10px;
-            background: #e0e0e0;
-            color: #555;
-            margin-top: 15px;
+            padding: 11px;
+            background: #E8EEE9;
+            color: #4A5A50;
+            margin-top: 12px;
             text-align: center;
         }
-        .btn-load-more:hover { background: #d0d0d0; }
+        .btn-load-more:hover { background: #DCE4DE; }
 
-        /* Mobile Tweaks */
-        @media (max-width: 500px) {
+        .empty-state {
+            padding: 22px 16px;
+            color: var(--muted);
+            text-align: center;
+            background: rgba(255,255,255,0.55);
+            border-radius: var(--radius-sm);
+            border: 1px dashed #C9D6CC;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 520px) {
+            .auth-card { padding: 26px 18px; }
+            .outlet-grid { gap: 8px; }
+            .outlet-label { font-size: 0.82rem; }
             .task-card { flex-direction: column; }
-            .btn-complete { width: 100%; margin-top: 10px; }
+            .btn-complete { width: 100%; }
+            header { align-items: flex-start; }
         }
     </style>
 </head>
@@ -169,73 +470,111 @@
 
     <!-- 1. Login Section -->
     <div id="login-section" class="section container">
-        <div class="auth-card">
-            <span class="logo-text">Juice Therapy</span>
-            <h2>Staff Login</h2>
-            <div id="login-error" class="error-msg"></div>
-            <input type="text" id="login-id" placeholder="Login ID" autocomplete="username">
-            <input type="password" id="login-pass" placeholder="Password" autocomplete="current-password">
-            <button id="btn-login" class="btn-block btn-primary">Login</button>
+        <div class="auth-wrap">
+            <div class="auth-card">
+                <div class="brand-mark">
+                    <span class="brand-name">Juice Therapy</span>
+                    <span class="brand-sub">Staff Task Manager</span>
+                </div>
+                <h2>Select your outlet</h2>
+                <p class="auth-hint">Choose outlet, then enter that outlet’s password.</p>
+                <div id="login-error" class="error-msg"></div>
+
+                <div class="outlet-grid" role="radiogroup" aria-label="Outlet">
+                    <label class="outlet-option" data-outlet="birati">
+                        <input type="radio" name="outlet" value="birati" id="outlet-birati">
+                        <span class="outlet-tile">
+                            <span class="outlet-icon">B</span>
+                            <span class="outlet-label">JT BIRATI</span>
+                            <span class="outlet-code">Birati outlet</span>
+                        </span>
+                    </label>
+                    <label class="outlet-option" data-outlet="nimta">
+                        <input type="radio" name="outlet" value="nimta" id="outlet-nimta">
+                        <span class="outlet-tile">
+                            <span class="outlet-icon">N</span>
+                            <span class="outlet-label">JT NIMTA</span>
+                            <span class="outlet-code">Nimta outlet</span>
+                        </span>
+                    </label>
+                </div>
+
+                <label class="field-label" for="login-pass">Outlet password</label>
+                <input type="password" id="login-pass" placeholder="Enter password" autocomplete="current-password">
+                <button id="btn-login" class="btn-block btn-primary">Continue</button>
+            </div>
         </div>
     </div>
 
     <!-- 2. Staff Name Section -->
     <div id="staff-section" class="section container">
-        <div class="auth-card">
-            <span class="logo-text">Juice Therapy</span>
-            <h2>Who is checking in?</h2>
-            <div id="staff-error" class="error-msg"></div>
-            <input type="text" id="staff-name-input" placeholder="Enter your name (e.g., Rahul)" autocomplete="name">
-            <button id="btn-staff-confirm" class="btn-block btn-primary">Continue to Dashboard</button>
+        <div class="auth-wrap">
+            <div class="auth-card">
+                <div class="brand-mark">
+                    <span class="brand-name">Juice Therapy</span>
+                    <span class="brand-sub" id="staff-outlet-label">Outlet</span>
+                </div>
+                <h2>Who is checking in?</h2>
+                <p class="auth-hint">Your name is saved with tasks you create or complete.</p>
+                <div id="staff-error" class="error-msg"></div>
+                <label class="field-label" for="staff-name-input">Staff name</label>
+                <input type="text" id="staff-name-input" placeholder="e.g. Rahul" autocomplete="name">
+                <button id="btn-staff-confirm" class="btn-block btn-primary">Open Dashboard</button>
+            </div>
         </div>
     </div>
 
     <!-- 3. Dashboard Section -->
     <div id="dashboard-section" class="section container">
         <header>
-            <div>
-                <span class="logo-text" style="font-size: 1.2rem;">Juice Therapy</span>
-                <div class="user-info">Logged in as: <strong id="display-staff-name"></strong></div>
+            <div class="header-left">
+                <div class="header-brand">Juice Therapy</div>
+                <div class="user-info">
+                    <span class="outlet-badge" id="display-outlet-badge">Outlet</span>
+                    <span>Staff: <strong id="display-staff-name"></strong></span>
+                </div>
             </div>
             <button id="btn-logout" class="btn-logout">Logout</button>
         </header>
 
-        <!-- Create Task -->
+        <div class="stats-row">
+            <div class="stat-chip todo">
+                <div class="stat-label">To Do</div>
+                <div class="stat-value" id="stat-todo">0</div>
+            </div>
+            <div class="stat-chip done">
+                <div class="stat-label">Completed</div>
+                <div class="stat-value" id="stat-done">0</div>
+            </div>
+        </div>
+
         <div class="create-task-box">
-            <textarea id="new-task-text" placeholder="Write a new instruction or task here..."></textarea>
+            <label for="new-task-text">New task for this outlet</label>
+            <textarea id="new-task-text" placeholder="Write a new instruction or task…"></textarea>
             <button id="btn-create-task" class="btn-block btn-primary">Create Task</button>
         </div>
 
-        <!-- ToDo List -->
-        <h3>⚡ To Do</h3>
-        <ul id="todo-list" class="task-list">
-            <!-- Dynamic Content -->
-        </ul>
+        <h3 class="section-title">To Do</h3>
+        <ul id="todo-list" class="task-list"></ul>
 
-        <!-- Completed List -->
-        <h3>✅ Completed History</h3>
-        <ul id="completed-list" class="task-list">
-            <!-- Dynamic Content -->
-        </ul>
+        <h3 class="section-title">Completed History</h3>
+        <ul id="completed-list" class="task-list"></ul>
         <button id="btn-load-more" class="btn-load-more" style="display:none;">Show More</button>
     </div>
 
-    <!-- Firebase & Application Logic -->
     <script type="module">
-        // --- 1. CONFIGURATION ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { 
-            getFirestore, 
-            collection, 
-            addDoc, 
-            query, 
-            where, 
-            // orderBy removed to prevent index errors
-            onSnapshot, 
-            updateDoc, 
-            doc, 
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            query,
+            where,
+            onSnapshot,
+            updateDoc,
+            doc,
             getDocs,
-            serverTimestamp 
+            serverTimestamp
         } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -250,133 +589,210 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- 2. STATE MANAGEMENT ---
-        const SESSION_KEY_LOGIN = 'jt_is_logged_in';
-        const SESSION_KEY_STAFF = 'jt_staff_name';
-        
-        let unsubscribeTodo = null; 
-        
-        // Client-side pagination state
-        let allCompletedTasks = []; 
+        // --- Outlets (isolated credentials + data) ---
+        const OUTLETS = {
+            birati: {
+                id: "birati",
+                name: "JT BIRATI",
+                password: "jtbirati51"
+            },
+            nimta: {
+                id: "nimta",
+                name: "JT NIMTA",
+                password: "jtnimta49"
+            }
+        };
+
+        const SESSION_KEY_LOGIN = "jt_is_logged_in";
+        const SESSION_KEY_STAFF = "jt_staff_name";
+        const SESSION_KEY_OUTLET = "jt_outlet_id";
+
+        let unsubscribeTodo = null;
+        let allCompletedTasks = [];
         let completedPageSize = 10;
         let completedShownCount = 0;
 
-        // --- 3. DOM ELEMENTS ---
         const sections = {
-            login: document.getElementById('login-section'),
-            staff: document.getElementById('staff-section'),
-            dashboard: document.getElementById('dashboard-section')
+            login: document.getElementById("login-section"),
+            staff: document.getElementById("staff-section"),
+            dashboard: document.getElementById("dashboard-section")
         };
-        
-        // Login Elements
-        const inputId = document.getElementById('login-id');
-        const inputPass = document.getElementById('login-pass');
-        const btnLogin = document.getElementById('btn-login');
-        const loginError = document.getElementById('login-error');
 
-        // Staff Elements
-        const inputStaffName = document.getElementById('staff-name-input');
-        const btnStaffConfirm = document.getElementById('btn-staff-confirm');
-        const staffError = document.getElementById('staff-error');
+        const inputPass = document.getElementById("login-pass");
+        const btnLogin = document.getElementById("btn-login");
+        const loginError = document.getElementById("login-error");
+        const inputStaffName = document.getElementById("staff-name-input");
+        const btnStaffConfirm = document.getElementById("btn-staff-confirm");
+        const staffError = document.getElementById("staff-error");
+        const staffOutletLabel = document.getElementById("staff-outlet-label");
+        const displayStaffName = document.getElementById("display-staff-name");
+        const displayOutletBadge = document.getElementById("display-outlet-badge");
+        const btnLogout = document.getElementById("btn-logout");
+        const inputTaskText = document.getElementById("new-task-text");
+        const btnCreateTask = document.getElementById("btn-create-task");
+        const todoList = document.getElementById("todo-list");
+        const completedList = document.getElementById("completed-list");
+        const btnLoadMore = document.getElementById("btn-load-more");
+        const statTodo = document.getElementById("stat-todo");
+        const statDone = document.getElementById("stat-done");
 
-        // Dashboard Elements
-        const displayStaffName = document.getElementById('display-staff-name');
-        const btnLogout = document.getElementById('btn-logout');
-        const inputTaskText = document.getElementById('new-task-text');
-        const btnCreateTask = document.getElementById('btn-create-task');
-        const todoList = document.getElementById('todo-list');
-        const completedList = document.getElementById('completed-list');
-        const btnLoadMore = document.getElementById('btn-load-more');
+        function getSelectedOutletId() {
+            const checked = document.querySelector('input[name="outlet"]:checked');
+            return checked ? checked.value : null;
+        }
 
-        // --- 4. NAVIGATION & INIT ---
+        function getCurrentOutlet() {
+            const id = sessionStorage.getItem(SESSION_KEY_OUTLET);
+            return id && OUTLETS[id] ? OUTLETS[id] : null;
+        }
+
+        /** Tasks belong only to their outlet. Legacy Birati tasks (no outletId) stay on Birati only. */
+        function belongsToOutlet(task, outletId) {
+            if (task.outletId === outletId) return true;
+            if (outletId === "birati" && !task.outletId) return true;
+            return false;
+        }
+
+        function filterByOutlet(tasks, outletId) {
+            return tasks.filter((t) => belongsToOutlet(t, outletId));
+        }
+
         function init() {
             const isLoggedIn = sessionStorage.getItem(SESSION_KEY_LOGIN);
             const staffName = sessionStorage.getItem(SESSION_KEY_STAFF);
+            const outlet = getCurrentOutlet();
 
-            if (isLoggedIn === 'true') {
+            if (isLoggedIn === "true" && outlet) {
                 if (staffName) {
                     showDashboard(staffName);
                 } else {
-                    showSection('staff');
+                    staffOutletLabel.textContent = outlet.name;
+                    showSection("staff");
                 }
             } else {
-                showSection('login');
+                sessionStorage.removeItem(SESSION_KEY_LOGIN);
+                sessionStorage.removeItem(SESSION_KEY_OUTLET);
+                showSection("login");
             }
         }
 
         function showSection(sectionName) {
-            Object.values(sections).forEach(el => el.classList.remove('active-section'));
-            sections[sectionName].classList.add('active-section');
+            Object.values(sections).forEach((el) => el.classList.remove("active-section"));
+            sections[sectionName].classList.add("active-section");
         }
 
-        // --- 5. AUTH LOGIC ---
-        btnLogin.addEventListener('click', () => {
-            const id = inputId.value.trim();
+        btnLogin.addEventListener("click", () => {
+            const outletId = getSelectedOutletId();
             const pass = inputPass.value.trim();
 
-            if (id === 'JTbirati' && pass === '0051') {
-                sessionStorage.setItem(SESSION_KEY_LOGIN, 'true');
-                loginError.textContent = '';
-                const existingStaff = sessionStorage.getItem(SESSION_KEY_STAFF);
-                if (existingStaff) {
-                    showDashboard(existingStaff);
-                } else {
-                    showSection('staff');
-                }
+            if (!outletId) {
+                loginError.textContent = "Please select an outlet.";
+                return;
+            }
+
+            const outlet = OUTLETS[outletId];
+            if (!outlet || pass !== outlet.password) {
+                loginError.textContent = "Invalid password for this outlet.";
+                return;
+            }
+
+            const previousOutlet = sessionStorage.getItem(SESSION_KEY_OUTLET);
+            if (previousOutlet && previousOutlet !== outletId) {
+                sessionStorage.removeItem(SESSION_KEY_STAFF);
+            }
+
+            sessionStorage.setItem(SESSION_KEY_LOGIN, "true");
+            sessionStorage.setItem(SESSION_KEY_OUTLET, outletId);
+            loginError.textContent = "";
+            inputPass.value = "";
+
+            staffOutletLabel.textContent = outlet.name;
+            const existingStaff = sessionStorage.getItem(SESSION_KEY_STAFF);
+            if (existingStaff) {
+                showDashboard(existingStaff);
             } else {
-                loginError.textContent = '❌ Invalid ID or Password';
+                showSection("staff");
+                inputStaffName.focus();
             }
         });
 
-        btnStaffConfirm.addEventListener('click', () => {
+        inputPass.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") btnLogin.click();
+        });
+
+        btnStaffConfirm.addEventListener("click", () => {
             const name = inputStaffName.value.trim();
             if (name.length > 0) {
                 sessionStorage.setItem(SESSION_KEY_STAFF, name);
+                staffError.textContent = "";
                 showDashboard(name);
             } else {
-                staffError.textContent = 'Please enter your name.';
+                staffError.textContent = "Please enter your name.";
             }
         });
 
+        inputStaffName.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") btnStaffConfirm.click();
+        });
+
         function logout() {
+            if (unsubscribeTodo) {
+                unsubscribeTodo();
+                unsubscribeTodo = null;
+            }
             sessionStorage.clear();
-            if (unsubscribeTodo) unsubscribeTodo();
             window.location.reload();
         }
 
-        btnLogout.addEventListener('click', logout);
+        btnLogout.addEventListener("click", logout);
 
-        // --- 6. DASHBOARD LOGIC ---
         function showDashboard(staffName) {
+            const outlet = getCurrentOutlet();
+            if (!outlet) {
+                logout();
+                return;
+            }
+
             displayStaffName.textContent = staffName;
-            showSection('dashboard');
-            
+            displayOutletBadge.textContent = outlet.name;
+            displayOutletBadge.classList.toggle("nimta", outlet.id === "nimta");
+            showSection("dashboard");
+
+            if (unsubscribeTodo) {
+                unsubscribeTodo();
+                unsubscribeTodo = null;
+            }
             subscribeToTodos();
-            fetchAndRenderCompletedTasks(); // Initial load
+            fetchAndRenderCompletedTasks();
         }
 
-        // --- 7. FIRESTORE OPERATIONS ---
-
-        // A. CREATE TASK
-        btnCreateTask.addEventListener('click', async () => {
+        btnCreateTask.addEventListener("click", async () => {
             const text = inputTaskText.value.trim();
             if (!text) return;
 
             const staffName = sessionStorage.getItem(SESSION_KEY_STAFF);
-            
+            const outlet = getCurrentOutlet();
+            if (!outlet) {
+                alert("Session expired. Please log in again.");
+                logout();
+                return;
+            }
+
             btnCreateTask.disabled = true;
-            btnCreateTask.textContent = "Saving...";
+            btnCreateTask.textContent = "Saving…";
 
             try {
                 await addDoc(collection(db, "tasks"), {
                     taskText: text,
                     status: "todo",
+                    outletId: outlet.id,
+                    outletName: outlet.name,
                     createdBy: staffName,
                     createdAt: serverTimestamp(),
                     completedBy: null,
                     completedAt: null
                 });
-                inputTaskText.value = ""; 
+                inputTaskText.value = "";
             } catch (e) {
                 console.error("Error adding task: ", e);
                 alert("Failed to create task. Check network.");
@@ -386,9 +802,10 @@
             }
         });
 
-        // B. REAL-TIME TODO LIST (Fixed: No orderBy in query)
         function subscribeToTodos() {
-            // FIX: Removed orderBy("createdAt") to avoid index error
+            const outlet = getCurrentOutlet();
+            if (!outlet) return;
+
             const q = query(
                 collection(db, "tasks"),
                 where("status", "==", "todo")
@@ -396,42 +813,50 @@
 
             unsubscribeTodo = onSnapshot(q, (snapshot) => {
                 const tasks = [];
-                snapshot.forEach((doc) => {
-                    tasks.push({ id: doc.id, ...doc.data() });
+                snapshot.forEach((d) => {
+                    tasks.push({ id: d.id, ...d.data() });
                 });
 
-                // Client-side Sort (Newest First)
-                tasks.sort((a, b) => {
+                const outletTasks = filterByOutlet(tasks, outlet.id);
+
+                outletTasks.sort((a, b) => {
                     const timeA = a.createdAt ? a.createdAt.toMillis() : Date.now();
                     const timeB = b.createdAt ? b.createdAt.toMillis() : Date.now();
                     return timeB - timeA;
                 });
 
-                renderTodoList(tasks);
+                renderTodoList(outletTasks);
+                statTodo.textContent = String(outletTasks.length);
             }, (error) => {
                 console.error("Error listening to todos:", error);
-                todoList.innerHTML = `<li style="color:red; padding:10px;">Error: ${error.message}</li>`;
+                todoList.innerHTML = `<li class="empty-state" style="color:var(--danger);">Error: ${escapeHtml(error.message)}</li>`;
             });
         }
 
         function renderTodoList(tasks) {
-            todoList.innerHTML = '';
+            todoList.innerHTML = "";
             if (tasks.length === 0) {
-                todoList.innerHTML = '<li style="padding:15px; color:#888; text-align:center;">No pending tasks. Great job! 🍹</li>';
+                todoList.innerHTML = '<li class="empty-state">No pending tasks for this outlet. Nice work!</li>';
                 return;
             }
-            tasks.forEach(task => {
+            tasks.forEach((task) => {
                 todoList.appendChild(createTaskElement(task.id, task, false));
             });
         }
 
-        // C. COMPLETE TASK
         window.completeTask = async (taskId) => {
             const staffName = sessionStorage.getItem(SESSION_KEY_STAFF);
+            const outlet = getCurrentOutlet();
+            if (!outlet) {
+                alert("Session expired. Please log in again.");
+                logout();
+                return;
+            }
+
             const btn = document.getElementById(`btn-${taskId}`);
-            if(btn) {
+            if (btn) {
                 btn.disabled = true;
-                btn.textContent = "Updating...";
+                btn.textContent = "Updating…";
             }
 
             try {
@@ -439,24 +864,27 @@
                 await updateDoc(taskRef, {
                     status: "completed",
                     completedBy: staffName,
-                    completedAt: serverTimestamp()
+                    completedAt: serverTimestamp(),
+                    // Ensure outlet tag exists (covers legacy Birati tasks)
+                    outletId: outlet.id,
+                    outletName: outlet.name
                 });
-                // Re-fetch completed list to include the new item
                 setTimeout(fetchAndRenderCompletedTasks, 500);
             } catch (e) {
                 console.error("Error completing task:", e);
                 alert("Failed to complete task.");
-                if(btn) {
+                if (btn) {
                     btn.disabled = false;
                     btn.textContent = "Done";
                 }
             }
         };
 
-        // D. COMPLETED TASKS (Fixed: Fetch all + Client Sort + Client Pagination)
         async function fetchAndRenderCompletedTasks() {
+            const outlet = getCurrentOutlet();
+            if (!outlet) return;
+
             try {
-                // FIX: Removed orderBy and limit to avoid index error
                 const q = query(
                     collection(db, "tasks"),
                     where("status", "==", "completed")
@@ -465,25 +893,25 @@
                 const snapshot = await getDocs(q);
                 allCompletedTasks = [];
 
-                snapshot.forEach((doc) => {
-                    allCompletedTasks.push({ id: doc.id, ...doc.data() });
+                snapshot.forEach((d) => {
+                    allCompletedTasks.push({ id: d.id, ...d.data() });
                 });
 
-                // Client-side Sort (Newest Completed First)
+                allCompletedTasks = filterByOutlet(allCompletedTasks, outlet.id);
+
                 allCompletedTasks.sort((a, b) => {
                     const timeA = a.completedAt ? a.completedAt.toMillis() : 0;
                     const timeB = b.completedAt ? b.completedAt.toMillis() : 0;
                     return timeB - timeA;
                 });
 
-                // Reset pagination
                 completedShownCount = 0;
-                completedList.innerHTML = '';
+                completedList.innerHTML = "";
+                statDone.textContent = String(allCompletedTasks.length);
                 showNextBatchOfCompleted();
-
             } catch (error) {
                 console.error("Error fetching history:", error);
-                completedList.innerHTML = `<li style="padding:15px; color:red;">Error: ${error.message}</li>`;
+                completedList.innerHTML = `<li class="empty-state" style="color:var(--danger);">Error: ${escapeHtml(error.message)}</li>`;
             }
         }
 
@@ -493,44 +921,40 @@
             const batch = allCompletedTasks.slice(start, end);
 
             if (batch.length === 0 && start === 0) {
-                completedList.innerHTML = '<li style="padding:15px; color:#888;">No completed tasks yet.</li>';
-                btnLoadMore.style.display = 'none';
+                completedList.innerHTML = '<li class="empty-state">No completed tasks yet for this outlet.</li>';
+                btnLoadMore.style.display = "none";
                 return;
             }
 
-            batch.forEach(task => {
+            batch.forEach((task) => {
                 completedList.appendChild(createTaskElement(task.id, task, true));
             });
 
             completedShownCount += batch.length;
-
-            // Toggle "Show More" button
-            if (completedShownCount < allCompletedTasks.length) {
-                btnLoadMore.style.display = 'block';
-            } else {
-                btnLoadMore.style.display = 'none';
-            }
+            btnLoadMore.style.display =
+                completedShownCount < allCompletedTasks.length ? "block" : "none";
         }
 
-        btnLoadMore.addEventListener('click', showNextBatchOfCompleted);
+        btnLoadMore.addEventListener("click", showNextBatchOfCompleted);
 
-        // --- 8. UI HELPERS ---
         function formatTime(timestamp) {
-            if (!timestamp) return 'Just now';
-            const date = timestamp.toDate(); 
-            return date.toLocaleString('en-IN', { 
-                month: 'short', day: 'numeric', 
-                hour: '2-digit', minute: '2-digit' 
+            if (!timestamp) return "Just now";
+            const date = timestamp.toDate();
+            return date.toLocaleString("en-IN", {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
             });
         }
 
         function createTaskElement(id, task, isCompleted) {
-            const li = document.createElement('li');
+            const li = document.createElement("li");
             li.className = `task-card status-${task.status}`;
-            
-            const timeStr = isCompleted 
-                ? `Completed by <strong>${task.completedBy}</strong> at ${formatTime(task.completedAt)}`
-                : `Created by <strong>${task.createdBy}</strong> • ${formatTime(task.createdAt)}`;
+
+            const timeStr = isCompleted
+                ? `Completed by <strong>${escapeHtml(task.completedBy || "—")}</strong> · ${formatTime(task.completedAt)}`
+                : `Created by <strong>${escapeHtml(task.createdBy || "—")}</strong> · ${formatTime(task.createdAt)}`;
 
             let html = `
                 <div class="task-content">
@@ -542,7 +966,7 @@
             if (!isCompleted) {
                 html += `
                     <button id="btn-${id}" class="btn-complete" onclick="completeTask('${id}')">
-                        ✔ Done
+                        Done
                     </button>
                 `;
             }
@@ -552,8 +976,8 @@
         }
 
         function escapeHtml(text) {
-            if(!text) return "";
-            return text
+            if (!text) return "";
+            return String(text)
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
@@ -561,10 +985,7 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // --- 9. BOOTSTRAP ---
-        window.init = init;
-        document.addEventListener('DOMContentLoaded', init);
-
+        document.addEventListener("DOMContentLoaded", init);
     </script>
 </body>
 </html>
