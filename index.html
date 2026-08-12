@@ -590,6 +590,122 @@
             font-size: 0.95rem;
         }
 
+        /* --- Dashboard nav cards --- */
+        .dash-nav {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .dash-nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 14px 14px 12px;
+            background: var(--white);
+            border: 1.5px solid #DCE5DF;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-sm);
+            text-align: left;
+            color: var(--text);
+            min-height: 72px;
+        }
+
+        .dash-nav-btn:hover {
+            border-color: #B7D4BE;
+            background: #FAFCFA;
+        }
+
+        .dash-nav-btn.active {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+            box-shadow: var(--ring);
+        }
+
+        .dash-nav-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 8px;
+        }
+
+        .dash-nav-label {
+            font-size: 0.92rem;
+            font-weight: 700;
+        }
+
+        .dash-nav-count {
+            min-width: 26px;
+            height: 26px;
+            padding: 0 8px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: #EEF2EF;
+            color: var(--text);
+        }
+
+        .dash-nav-btn[data-panel="todo"].active .dash-nav-count,
+        .dash-nav-btn[data-panel="todo"] .dash-nav-count {
+            background: #FFF0E4;
+            color: var(--secondary-dark);
+        }
+
+        .dash-nav-btn[data-panel="done"] .dash-nav-count {
+            background: var(--primary-soft);
+            color: var(--primary-dark);
+        }
+
+        .dash-nav-btn[data-panel="routines"] .dash-nav-count {
+            background: #E7F3F6;
+            color: #2F6B78;
+        }
+
+        .dash-nav-hint {
+            font-size: 0.72rem;
+            color: var(--muted);
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .dash-panel {
+            display: none;
+            background: var(--white);
+            border: 1px solid rgba(47, 143, 70, 0.06);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 16px;
+            margin-bottom: 8px;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .dash-panel.active-panel { display: block; }
+
+        .dash-panel-title {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .dash-panel .create-task-box {
+            box-shadow: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            background: transparent;
+        }
+
+        .dash-panel .section-title {
+            display: none;
+        }
+
         @media (max-width: 520px) {
             .auth-card { padding: 26px 18px; }
             .outlet-grid { gap: 8px; }
@@ -598,6 +714,8 @@
             .btn-complete, .btn-stop { width: 100%; }
             header { align-items: flex-start; }
             .schedule-options { grid-template-columns: 1fr; }
+            .dash-nav { gap: 8px; }
+            .dash-nav-btn { min-height: 68px; padding: 12px; }
         }
     </style>
 </head>
@@ -672,61 +790,90 @@
             <button id="btn-logout" class="btn-logout">Logout</button>
         </header>
 
-        <div class="stats-row">
-            <div class="stat-chip todo">
-                <div class="stat-label">To Do</div>
-                <div class="stat-value" id="stat-todo">0</div>
-            </div>
-            <div class="stat-chip done">
-                <div class="stat-label">Completed</div>
-                <div class="stat-value" id="stat-done">0</div>
+        <nav class="dash-nav" aria-label="Dashboard sections">
+            <button type="button" class="dash-nav-btn active" data-panel="todo" id="nav-todo">
+                <span class="dash-nav-top">
+                    <span class="dash-nav-label">To Do</span>
+                    <span class="dash-nav-count" id="stat-todo">0</span>
+                </span>
+                <span class="dash-nav-hint">Pending work today</span>
+            </button>
+            <button type="button" class="dash-nav-btn" data-panel="create" id="nav-create">
+                <span class="dash-nav-top">
+                    <span class="dash-nav-label">New Task</span>
+                    <span class="dash-nav-count">+</span>
+                </span>
+                <span class="dash-nav-hint">Once or scheduled</span>
+            </button>
+            <button type="button" class="dash-nav-btn" data-panel="routines" id="nav-routines">
+                <span class="dash-nav-top">
+                    <span class="dash-nav-label">Routines</span>
+                    <span class="dash-nav-count" id="stat-routines">0</span>
+                </span>
+                <span class="dash-nav-hint">Daily / weekly</span>
+            </button>
+            <button type="button" class="dash-nav-btn" data-panel="done" id="nav-done">
+                <span class="dash-nav-top">
+                    <span class="dash-nav-label">Completed</span>
+                    <span class="dash-nav-count" id="stat-done">0</span>
+                </span>
+                <span class="dash-nav-hint">History</span>
+            </button>
+        </nav>
+
+        <div id="panel-todo" class="dash-panel active-panel">
+            <h3 class="dash-panel-title">To Do</h3>
+            <ul id="todo-list" class="task-list"></ul>
+        </div>
+
+        <div id="panel-create" class="dash-panel">
+            <h3 class="dash-panel-title">New Task</h3>
+            <div class="create-task-box">
+                <label for="new-task-text">Task for this outlet</label>
+                <textarea id="new-task-text" placeholder="Write a new instruction or task…"></textarea>
+
+                <div class="schedule-box">
+                    <span class="field-label">When should this task appear?</span>
+                    <div class="schedule-options" role="radiogroup" aria-label="Task schedule">
+                        <label class="schedule-option">
+                            <input type="radio" name="schedule-type" value="once" checked>
+                            <span class="schedule-pill">Once</span>
+                        </label>
+                        <label class="schedule-option">
+                            <input type="radio" name="schedule-type" value="daily">
+                            <span class="schedule-pill">Everyday</span>
+                        </label>
+                        <label class="schedule-option">
+                            <input type="radio" name="schedule-type" value="weekly">
+                            <span class="schedule-pill">Specific days</span>
+                        </label>
+                    </div>
+                    <div id="weekday-row" class="weekday-row" aria-label="Weekdays">
+                        <label class="weekday-option"><input type="checkbox" value="1"><span class="weekday-chip">Mon</span></label>
+                        <label class="weekday-option"><input type="checkbox" value="2"><span class="weekday-chip">Tue</span></label>
+                        <label class="weekday-option"><input type="checkbox" value="3"><span class="weekday-chip">Wed</span></label>
+                        <label class="weekday-option"><input type="checkbox" value="4"><span class="weekday-chip">Thu</span></label>
+                        <label class="weekday-option"><input type="checkbox" value="5"><span class="weekday-chip">Fri</span></label>
+                        <label class="weekday-option"><input type="checkbox" value="6"><span class="weekday-chip">Sat</span></label>
+                        <label class="weekday-option"><input type="checkbox" value="0"><span class="weekday-chip">Sun</span></label>
+                    </div>
+                    <p id="schedule-hint" class="schedule-hint">Appears one time in To Do after you create it.</p>
+                </div>
+
+                <button id="btn-create-task" class="btn-block btn-primary">Create Task</button>
             </div>
         </div>
 
-        <div class="create-task-box">
-            <label for="new-task-text">New task for this outlet</label>
-            <textarea id="new-task-text" placeholder="Write a new instruction or task…"></textarea>
-
-            <div class="schedule-box">
-                <span class="field-label">When should this task appear?</span>
-                <div class="schedule-options" role="radiogroup" aria-label="Task schedule">
-                    <label class="schedule-option">
-                        <input type="radio" name="schedule-type" value="once" checked>
-                        <span class="schedule-pill">Once</span>
-                    </label>
-                    <label class="schedule-option">
-                        <input type="radio" name="schedule-type" value="daily">
-                        <span class="schedule-pill">Everyday</span>
-                    </label>
-                    <label class="schedule-option">
-                        <input type="radio" name="schedule-type" value="weekly">
-                        <span class="schedule-pill">Specific days</span>
-                    </label>
-                </div>
-                <div id="weekday-row" class="weekday-row" aria-label="Weekdays">
-                    <label class="weekday-option"><input type="checkbox" value="1"><span class="weekday-chip">Mon</span></label>
-                    <label class="weekday-option"><input type="checkbox" value="2"><span class="weekday-chip">Tue</span></label>
-                    <label class="weekday-option"><input type="checkbox" value="3"><span class="weekday-chip">Wed</span></label>
-                    <label class="weekday-option"><input type="checkbox" value="4"><span class="weekday-chip">Thu</span></label>
-                    <label class="weekday-option"><input type="checkbox" value="5"><span class="weekday-chip">Fri</span></label>
-                    <label class="weekday-option"><input type="checkbox" value="6"><span class="weekday-chip">Sat</span></label>
-                    <label class="weekday-option"><input type="checkbox" value="0"><span class="weekday-chip">Sun</span></label>
-                </div>
-                <p id="schedule-hint" class="schedule-hint">Appears one time in To Do after you create it.</p>
-            </div>
-
-            <button id="btn-create-task" class="btn-block btn-primary">Create Task</button>
+        <div id="panel-routines" class="dash-panel">
+            <h3 class="dash-panel-title">Daily / Weekly Routines</h3>
+            <ul id="schedule-list" class="task-list"></ul>
         </div>
 
-        <h3 class="section-title">To Do</h3>
-        <ul id="todo-list" class="task-list"></ul>
-
-        <h3 class="section-title">Daily / Weekly Routines</h3>
-        <ul id="schedule-list" class="task-list"></ul>
-
-        <h3 class="section-title">Completed History</h3>
-        <ul id="completed-list" class="task-list"></ul>
-        <button id="btn-load-more" class="btn-load-more" style="display:none;">Show More</button>
+        <div id="panel-done" class="dash-panel">
+            <h3 class="dash-panel-title">Completed History</h3>
+            <ul id="completed-list" class="task-list"></ul>
+            <button id="btn-load-more" class="btn-load-more" style="display:none;">Show More</button>
+        </div>
     </div>
 
     <script type="module">
@@ -817,8 +964,26 @@
         const btnLoadMore = document.getElementById("btn-load-more");
         const statTodo = document.getElementById("stat-todo");
         const statDone = document.getElementById("stat-done");
+        const statRoutines = document.getElementById("stat-routines");
         const weekdayRow = document.getElementById("weekday-row");
         const scheduleHint = document.getElementById("schedule-hint");
+
+        function showDashPanel(panelName) {
+            document.querySelectorAll(".dash-nav-btn").forEach((btn) => {
+                btn.classList.toggle("active", btn.dataset.panel === panelName);
+            });
+            document.querySelectorAll(".dash-panel").forEach((panel) => {
+                panel.classList.toggle("active-panel", panel.id === `panel-${panelName}`);
+            });
+
+            if (panelName === "create") {
+                setTimeout(() => inputTaskText.focus(), 50);
+            }
+        }
+
+        document.querySelectorAll(".dash-nav-btn").forEach((btn) => {
+            btn.addEventListener("click", () => showDashPanel(btn.dataset.panel));
+        });
 
         function getSelectedScheduleType() {
             const checked = document.querySelector('input[name="schedule-type"]:checked');
@@ -1012,6 +1177,7 @@
             displayOutletBadge.textContent = outlet.name;
             displayOutletBadge.classList.toggle("nimta", outlet.id === "nimta");
             showSection("dashboard");
+            showDashPanel("todo");
 
             if (unsubscribeTodo) {
                 unsubscribeTodo();
@@ -1185,6 +1351,7 @@
                     el.checked = false;
                 });
                 updateScheduleUI();
+                showDashPanel(scheduleType === "once" ? "todo" : "routines");
             } catch (e) {
                 console.error("Error adding task: ", e);
                 alert("Failed to create task. Check network.");
@@ -1217,6 +1384,7 @@
                         return timeB - timeA;
                     });
 
+                if (statRoutines) statRoutines.textContent = String(active.length);
                 renderScheduleList(active);
             }, (error) => {
                 console.error("Error listening to schedules:", error);
