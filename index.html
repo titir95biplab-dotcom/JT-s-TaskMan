@@ -246,6 +246,24 @@
             transform: none;
         }
 
+        .apk-download {
+            display: block;
+            margin-top: 16px;
+            padding: 12px 14px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            background: var(--primary-soft);
+            border: 1.5px solid #B7D4BE;
+            border-radius: var(--radius-sm);
+        }
+
+        .apk-download:hover {
+            background: #D8F0DC;
+        }
+
         .error-msg {
             color: var(--danger);
             margin-bottom: 12px;
@@ -816,6 +834,9 @@
                 <label class="field-label" for="login-pass">Outlet password</label>
                 <input type="password" id="login-pass" placeholder="Enter password" autocomplete="current-password">
                 <button id="btn-login" class="btn-block btn-primary">Continue</button>
+                <a class="apk-download" href="./apk/JuiceTherapy-TaskMan.apk" download="JuiceTherapy-TaskMan.apk">
+                    Android APK download · ফোনে ইনস্টল করুন
+                </a>
             </div>
         </div>
     </div>
